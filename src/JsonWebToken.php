@@ -1,13 +1,17 @@
 <?php
 
-  define("TOKEN_METHOD", "AES-128-ECB");
-
   class JsonWebToken {
+
+    const TOKEN_METHOD = "AES-128-ECB";
 
     private function decode_all($token, $key){
       $decode_token = base64_decode($token);
-      $decode_token = openssl_decrypt($decode_token, TOKEN_METHOD, $key);
+      $decode_token = openssl_decrypt($decode_token, self::TOKEN_METHOD, $key);
       $decode_token = json_decode($decode_token);
+
+      if(!isset($decode_token)){
+        throw new JwtDecodeException("Invalid token format.");
+      }
 
       return $decode_token;
     }
@@ -19,7 +23,7 @@
         "expiredIn" => strtotime("+ $expired_days")
       ];
 
-      $token = openssl_encrypt(json_encode($data), TOKEN_METHOD, $key);
+      $token = openssl_encrypt(json_encode($data), self::TOKEN_METHOD, $key);
       $token = base64_encode($token);
 
       return $token;
@@ -36,11 +40,7 @@
       $token_created_at = $decode_token->createdAt;
       $token_expired = $decode_token->expiredIn;
 
-      if($token_created_at === $token_expired) {
-        return true;
-      }
-
-      return false; 
+      return $token_created_at >= $token_expired; 
     }
 
   }

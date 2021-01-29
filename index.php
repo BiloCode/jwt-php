@@ -1,4 +1,5 @@
 <?php
+  require_once("./src/JWTDecodeException.php");
   require_once("./src/JsonWebToken.php");
 
   $key = "jwt_key";
